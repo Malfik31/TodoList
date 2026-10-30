@@ -1,0 +1,34 @@
+{% extends "tasks/base.html" %}
+
+{% block content %}
+<header>
+  <h1>{% if user.is_staff %}Все задачи{% else %}Мои задачи{% endif %}</h1>
+  <a class="btn btn-primary" href="{% url 'task_create' %}">Добавить задачу</a>
+</header>
+
+{% for message in messages %}
+  <div class="msg">{{ message }}</div>
+{% endfor %}
+
+{% for task in tasks %}
+  <div class="task {% if task.is_done %}done{% endif %}">
+    <div class="task-body">
+      <div class="task-title">{{ task.title }}</div>
+      {% if task.description %}<div class="task-desc">{{ task.description }}</div>{% endif %}
+      <div class="task-desc">{{ task.created_at|date:"d.m.Y H:i"}}{% if user.is_staff %} · {{ task.user|default:"без владельца" }}{% endif %}</div>
+    </div>
+    <div class="task-actions">
+      <form method="post" action="{% url 'task_toggle' task.pk %}">
+        {% csrf_token %}
+        <button class="btn btn-sm" type="submit">
+          {% if task.is_done %}Вернуть в работу{% else %}Выполнено{% endif %}
+        </button>
+      </form>
+      <a class="btn btn-sm" href="{% url 'task_update' task.pk %}">Изменить</a>
+      <a class="btn btn-sm btn-danger" href="{% url 'task_delete' task.pk %}">Удалить</a>
+    </div>
+  </div>
+{% empty %}
+  <p class="empty">Задач пока нет. Добавьте первую.</p>
+{% endfor %}
+{% endblock %}
